@@ -22,7 +22,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Include="C:\Users\chucker\source\tmp\VbOptionStrictAnalyzer\LICENSE.txt" Link="LICENSE.txt">
+	  <None Include="..\LICENSE.txt" Link="LICENSE.txt">
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>
 	  </None>
