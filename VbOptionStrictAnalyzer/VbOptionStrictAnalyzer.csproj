@@ -18,7 +18,7 @@
 	<PropertyGroup Condition="$(Configuration) == 'Release'">
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<IncludeSymbols>true</IncludeSymbols>
-		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>		
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -43,5 +43,39 @@
         </PackageReference>
         <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="4.6.0" />
     </ItemGroup>
+	
+	<!--
+	we need to move the DLL to a different package path
+	
+	https://www.meziantou.net/packaging-a-roslyn-analyzer-with-nuget-dependencies.htm
+	-->
+
+	<PropertyGroup Condition="$(Configuration) == 'Release'">
+		<IncludeBuildOutput>false</IncludeBuildOutput>
+	</PropertyGroup>
+
+	<Target Name="AddNuGetDlls" BeforeTargets="_GetPackageFiles">
+		<!-- Merge the collection of PackageReference and Assemblies using the NuGetPackageId key.
+           This produces a new list containing the DLL path and the "IncludeInPackage" metadata-->
+		<JoinItems Left="@(ResolvedCompileFileDefinitions)" LeftKey="NuGetPackageId" LeftMetadata="*" Right="@(PackageReference)" RightKey="" RightMetadata="*" ItemSpecToUse="Left">
+			<Output TaskParameter="JoinResult" ItemName="_PackagesToPack" />
+		</JoinItems>
+
+		<ItemGroup>
+			<!-- Remove NETStandard DLLs -->
+			<_PackagesToPack Remove="@(_PackagesToPack)" Condition="%(NuGetPackageId) == 'NETStandard.Library'" />
+			<_PackagesToPack Remove="@(_PackagesToPack)" Condition="%(_PackagesToPack.IncludeInPackage) != 'true'" />
+		</ItemGroup>
+
+		<Message Importance="High" Text="Adding DLLs from the following packages: @(_PackagesToPack->'%(NuGetPackageId)')" />
+
+		<ItemGroup>
+			<!-- Update the collection of items to pack with the DLLs from the NuGet packages -->
+			<None Include="@(_PackagesToPack)" Pack="true" PackagePath="analyzers/dotnet/vb" Visible="false" />
+
+			<!-- Add the DLL produced by the current project to the NuGet package -->
+			<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/vb" Visible="false" />
+		</ItemGroup>
+	</Target>
 
 </Project>
