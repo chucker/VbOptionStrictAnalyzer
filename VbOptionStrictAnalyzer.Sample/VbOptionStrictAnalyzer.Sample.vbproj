@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Analyzer Include="../VbOptionStrictAnalyzer/bin/Debug/netstandard2.0/VbOptionStrictAnalyzer.dll" />
+    </ItemGroup>
+    
+</Project>
